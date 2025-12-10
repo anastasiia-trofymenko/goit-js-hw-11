@@ -255,16 +255,18 @@ body {
 .card-list {
   display: flex;
   flex-direction: row;
+  gap: 32px;
   align-items: center;
+  padding: 4px 20px;
 }
 
 .card-list-li {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
-  gap: 5px;
-  padding: 4px;
+  /* padding: 4px; */
   justify-content: center;
+  text-align: center;
 }
 
 ul {
