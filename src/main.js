@@ -1,61 +1,61 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-
-import searchImages from './js/pixabay-api.js';
-import renderImages from './js/render-functions.js';
+import { searchImages } from './js/pixabay-api.js';
+import {
+  renderImages,
+  clearGallery,
+  showLoader,
+  hideLoader,
+} from './js/render-functions.js';
 
 const input = document.querySelector('.input');
-const gallery = document.querySelector('.gallery');
 const form = document.querySelector('.form');
-const loader = document.querySelector('.loader');
 
-form.addEventListener('submit', event => {
+iziToast.settings({
+  timeout: 4000,
+  position: 'topRight',
+  transitionIn: 'fadeInRight',
+  transitionOut: 'fadeOutRight',
+});
+
+form.addEventListener('submit', onSearch);
+
+function onSearch(event) {
   event.preventDefault();
 
   const search = input.value.trim();
 
   if (search === '') {
-    iziToast.show({
-      title: '❌',
-      message: 'Please enter the appropriate search query!',
-      messageColor: 'white',
-      backgroundColor: 'red',
-      position: 'topRight',
-    });
+    iziToast.error({ title: 'Error', message: 'Please enter a search query' });
     return;
   }
-  loader.classList.remove('is-hidden');
-  gallery.innerHTML = '';
+
+  clearGallery();
+  showLoader();
+
   // data.hits  - зображення
   searchImages(search)
     .then(data => {
-      if (data.hits.length === 0) {
-        iziToast.show({
-          title: '❌',
+      if (!data || !Array.isArray(data.hits) || data.hits.length === 0) {
+        iziToast.error({
+          title: 'Sorry',
           message:
             'Sorry, there are no images matching your search query. Please try again!',
-          messageColor: 'black',
-          backgroundColor: 'orange',
-          position: 'topRight',
         });
         return;
       }
       renderImages(data.hits);
       form.reset();
     })
-    .catch(error =>
-      iziToast.show({
-        title: '❌',
-        message: error.message,
-        messageColor: 'black',
-        backgroundColor: 'red',
-        position: 'topRight',
-      })
-    )
+    .catch(error => {
+      console.error(error);
+      iziToast.error({
+        title: 'Error',
+        message: 'Something went wrong. Please try again later.',
+      });
+    })
     .finally(() => {
-      loader.classList.add('is-hidden');
+      hideLoader();
     });
-});
+}
